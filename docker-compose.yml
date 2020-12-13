@@ -26,12 +26,8 @@ services:
   front:
     build: ./client
     restart: always
-    depends_on:
-      - api
     volumes:
       - ./client/src:/usr/client/src
       - ./client/tests:/usr/client/tests
     ports:
       - 8080:8080
-    environment:
-      API_HOST: api
