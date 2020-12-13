@@ -1,5 +1,9 @@
+services:
+  - docker
+
 env:
   - DOCKER_COMPOSE_VERSION=1.27.0
+  - CC_TEST_REPORTER_ID=e187186042e95968f0b6d9c501f42c477d1025666bd6aef6d296c05df95eed4c
   
 before_install:
   - sudo rm /usr/local/bin/docker-compose
@@ -8,6 +12,9 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 install:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporte
+  - ./cc-test-reporter before-build
   - docker-compose up -d --build
 
 script:
@@ -15,4 +22,5 @@ script:
   - docker-compose exec front yarn run test:unit
 
 after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
   - docker-compose down
