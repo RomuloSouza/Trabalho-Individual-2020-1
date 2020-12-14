@@ -1,11 +1,6 @@
 services:
   - postgresql
 
-stages:
-  - installation
-  - test
-  # - coverage
-
 cache:
   bundler: true
   directories:
@@ -14,6 +9,13 @@ cache:
 env:
   global:
     CC_TEST_REPORTER_ID=e187186042e95968f0b6d9c501f42c477d1025666bd6aef6d296c05df95eed4c
+
+stages:
+  - installation
+  - test
+  # - coverage
+
+
 
 # before_install:
 #   - cd api
@@ -44,14 +46,15 @@ jobs:
       script:
         - yarn install
 
-    # - stage: "Tests"
-    #   script:
-    #     - cd api
-    #     - bundle exec rails test
-      
-    #   script:
-    #     - cd client
-    #     - yarn run test:unit
+    - stage: test
+      name: "API Tests"
+      script:
+        - cd api
+        - bundle exec rails test
+    - name: "Client Tests"
+      script:
+        - cd client
+        - yarn run test:unit
 
 
 # jobs:
