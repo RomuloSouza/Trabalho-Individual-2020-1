@@ -1,35 +1,118 @@
+language: ruby
+rvm:
+  - 2.5.7
+
 services:
   - postgresql
+
+cache:
+  bundler: true
+  directories:
+    - ./client/node_modules
 
 env:
   global:
     CC_TEST_REPORTER_ID=e187186042e95968f0b6d9c501f42c477d1025666bd6aef6d296c05df95eed4c
 
-jobs:
-  include:
-    - language: ruby
-      rvm:
-        - 2.5.7
-      before_install:
-        - cd api
-        - gem install bundler:2.1.4
-      install:
-        - bundle install
-      before_script:
-        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        - chmod +x ./cc-test-reporter
-        - rake db:create
-        - rake db:migrate
-      script:
-        - bundle exec rails test
-      after_script:
-        - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.json coverage/.resultset.json # Format coverage
-        - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
-    - language: node_js
-      node_js: 14
-      before_install:
-        - cd client
-      install:
-        - yarn install
-      script:
-        - yarn run test:unit
+# stages:
+#   - installation
+#   - test
+#   - coverage
+
+before_install:
+  - echo "Preparing for installation"
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - nvm install v14.15.1
+  - cd api && gem install bundler:2.1.4
+
+install:
+  - echo "Installing dependencies"
+  - bundle install
+  - rake db:create
+  - rake db:migrate
+  - cd ../client && yarn install && cd ..
+
+script:
+  - echo "Running API tests"
+  - cd api && bundle exec rails test
+  - echo "Running CLIENT tests"
+  - cd ../client && yarn test:unit && cd ..
+  - ls client
+
+after_script:
+  - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json api/coverage/.resultset.json # Format backend coverage
+  - ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json client/coverage/lcov.info # Format frontend coverage
+  - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  
+  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
+
+  # before_install:
+#   - cd api
+#   - gem install bundler:2.1.4
+#   - cd ..
+
+# jobs:
+#   include:
+#     - stage: installation
+#       name: "API Installation"
+#       language: ruby
+#       rvm:
+#         - 2.5.7
+#       before_script:
+#         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+#         - chmod +x ./cc-test-reporter
+#         - cd api
+#         - gem install bundler:2.1.4
+#       script:
+#         - bundle install
+#         - rake db:create
+#         - rake db:migrate
+#     - name: "Client Installation"
+#       language: node_js
+#       node_js: 14
+#       before_script:
+#         - cd client
+#       script:
+#         - yarn install
+
+#     - stage: test
+#       name: "API Tests"
+#       script:
+#         - cd api
+#         - bundle exec rails test
+#     - name: "Client Tests"
+#       script:
+#         - cd client
+#         - yarn run test:unit
+
+
+# jobs:
+#   include:
+#     - language: ruby
+#       rvm:
+#         - 2.5.7
+#       before_install:
+#         - cd api
+#         - gem install bundler:2.1.4
+#       install:
+#         - bundle install
+#       before_script:
+#         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+#         - chmod +x ./cc-test-reporter
+#         - rake db:create
+#         - rake db:migrate
+#       script:
+#         - bundle exec rails test
+#       after_script:
+#         - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json ./coverage/.resultset.json # Format coverage
+#         - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
+
+#     - language: node_js
+#       node_js: 14
+#       before_install:
+#         - cd client
+#       install:
+#         - yarn install
+#       script:
+#         - yarn run test:unit
+#       after_script:
