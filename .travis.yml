@@ -23,8 +23,11 @@ jobs:
       script:
         - bundle exec rails test
       after_script:
-        - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.json coverage/.resultset.json # Format coverage
+        - cd ..
+        - mv api/cc-test-reporter .
+        - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.json ./api/coverage/.resultset.json # Format coverage
         - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
+
     - language: node_js
       node_js: 14
       before_install:
