@@ -1,3 +1,7 @@
+language: ruby
+rvm:
+  - 2.5.7
+
 services:
   - postgresql
 
@@ -10,51 +14,65 @@ env:
   global:
     CC_TEST_REPORTER_ID=e187186042e95968f0b6d9c501f42c477d1025666bd6aef6d296c05df95eed4c
 
-stages:
-  - installation
-  - test
-  # - coverage
+# stages:
+#   - installation
+#   - test
+#   - coverage
 
+before_install:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - nvm install v14.15.1
+  - cd api && gem install bundler:2.1.4
 
+install:
+  - bundle install
+  - rake db:create
+  - rake db:migrate
+  - cd ../client && yarn install && cd ..
 
-# before_install:
+script:
+  - cd api && bundle exec rails test
+  - cd ../client && yarn test:unit
+
+  # before_install:
 #   - cd api
 #   - gem install bundler:2.1.4
 #   - cd ..
 
-jobs:
-  include:
-    - stage: installation
-      name: "API Installation"
-      language: ruby
-      rvm:
-        - 2.5.7
-      before_script:
-        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        - chmod +x ./cc-test-reporter
-        - cd api
-        - gem install bundler:2.1.4
-      script:
-        - bundle install
-        - rake db:create
-        - rake db:migrate
-    - name: "Client Installation"
-      language: node_js
-      node_js: 14
-      before_script:
-        - cd client
-      script:
-        - yarn install
+# jobs:
+#   include:
+#     - stage: installation
+#       name: "API Installation"
+#       language: ruby
+#       rvm:
+#         - 2.5.7
+#       before_script:
+#         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+#         - chmod +x ./cc-test-reporter
+#         - cd api
+#         - gem install bundler:2.1.4
+#       script:
+#         - bundle install
+#         - rake db:create
+#         - rake db:migrate
+#     - name: "Client Installation"
+#       language: node_js
+#       node_js: 14
+#       before_script:
+#         - cd client
+#       script:
+#         - yarn install
 
-    - stage: test
-      name: "API Tests"
-      script:
-        - cd api
-        - bundle exec rails test
-    - name: "Client Tests"
-      script:
-        - cd client
-        - yarn run test:unit
+#     - stage: test
+#       name: "API Tests"
+#       script:
+#         - cd api
+#         - bundle exec rails test
+#     - name: "Client Tests"
+#       script:
+#         - cd client
+#         - yarn run test:unit
 
 
 # jobs:
