@@ -15,7 +15,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./api:/usr/api
+      - ./api:/api
     ports:
       - 3000:3000
     environment:

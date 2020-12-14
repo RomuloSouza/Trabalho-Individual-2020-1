@@ -2,7 +2,7 @@ FROM ruby:2.5.7
 
 RUN gem install bundler:2.1.4
 
-WORKDIR /usr/api
+WORKDIR /api
 
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
