@@ -25,13 +25,13 @@
 * Foi criado um arquivo docker-compose yml para subir os 3 containeres do projeto: api, front, db(utiliza a imagem postgresql).
 * No compose são declaradas as variáveis de ambiente, mapeadas portas e feito binds nos volumes.
 
-## Executando projeto
+### Executando projeto
 
 ```bash
 $ docker-compose up
 ```
 
-## Executando os testes
+### Executando os testes
 
 Com os containers up, execute os seguintes comando para rodar os testes
  
@@ -45,7 +45,17 @@ $ docker-compose exec front yarn run test:unit
 
 ## Integração Contínua
 
-Para realizar a integração contínua, foi utilizado o Travis CI. Dentro do CI, são instaladas as ferramentas necessárias, realizado o build da aplicação e rodados os testes.
+Para realizar a integração contínua, foi utilizado o Travis CI. Dentro do arquivo `.travis.yml`, é realizado um `job` com as seguintes `phases`:
+
+    - pré-build
+    - build
+    - testes
+    - cobertura de testes
+
+Caso algum estágio da pipeline falhe, não é permitido realizar o merge no PR:
+
+![pr_failure](./images/pr_failure.jpg)
+
 
 ### Coleta de métricas
 
